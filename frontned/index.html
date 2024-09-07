@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image to Cloudinary</title>
+</head>
+<body>
+    <h1>Upload Image to Cloudinary</h1>
+    <form id="uploadForm">
+        <input type="file" id="fileInput" accept="image/*, application/pdf" required />
+        <button type="submit">Upload file</button>
+    </form>
+
+    <!-- Section to display the uploaded image URL -->
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0]; // Get the selected file
+
+            if (!file) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            const formData = new FormData(); // Create a FormData object
+            formData.append('file', file); // Append the file to FormData
+
+            try {
+                // Send the FormData to the backend
+                const response = await fetch('http://localhost:5000/upload', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+                
+                // Display Cloudinary upload result in the result div
+                const resultDiv = document.getElementById('result');
+                if (result.url) {
+                    resultDiv.innerHTML = `<p>Image uploaded successfully! URL: <a href="${result.url}" target="_blank">${result.url}</a></p>`;
+                    resultDiv.innerHTML += `<img src="${result.url}" alt="Uploaded Image" style="max-width: 400px; margin-top: 10px;">`; // Display the uploaded image
+                } else {
+                    resultDiv.innerHTML = `<p>Error uploading image: ${result.error}</p>`;
+                }
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                alert('Error uploading image');
+            }
+        });
+    </script>
+</body>
+</html>
